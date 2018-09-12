@@ -1,6 +1,7 @@
 // src/Auth/Auth.js
 
 import auth0 from "auth0-js";
+import nookies from "nookies";
 
 export default class Auth {
   auth0 = new auth0.WebAuth({
@@ -15,7 +16,8 @@ export default class Auth {
     this.auth0.authorize();
   }
 
-  constructor() {
+  constructor(ctx) {
+    this.ctx = ctx;
     this.login = this.login.bind(this);
     this.logout = this.logout.bind(this);
     this.handleAuthentication = this.handleAuthentication.bind(this);
@@ -37,22 +39,30 @@ export default class Auth {
     let expiresAt = JSON.stringify(
       authResult.expiresIn * 1000 + new Date().getTime()
     );
-    localStorage.setItem("access_token", authResult.accessToken);
-    localStorage.setItem("id_token", authResult.idToken);
-    localStorage.setItem("expires_at", expiresAt);
+
+    cookieParams = {
+      maxAge: 30 * 24 * 60 * 60,
+      path: "/",
+      secure: false
+    };
+
+    nookies.set(this.ctx, "access_token", authResult.accessToken, cookieParams);
+    nookies.set(this.ctx, "id_token", authResult.idToken, cookieParams);
+    nookies.set(this.ctx, "expires_at", expiresAt, cookieParams);
   }
 
   logout() {
     // Clear Access Token and ID Token from local storage
-    localStorage.removeItem("access_token");
-    localStorage.removeItem("id_token");
-    localStorage.removeItem("expires_at");
+    nookies.destroy(this.ctx, "access_token");
+    nookies.destroy(this.ctx, "id_token");
+    nookies.destroy(this.ctx, "expires_at");
   }
 
   isAuthenticated() {
     // Check whether the current time is past the
     // Access Token's expiry time
-    let expiresAt = JSON.parse(localStorage.getItem("expires_at"));
+    let expiresAt = nookies.get(this.ctx, "expires_at") || 0;
+    console.log(expiresAt)
     return new Date().getTime() < expiresAt;
   }
 }
