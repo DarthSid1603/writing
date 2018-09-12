@@ -6,10 +6,11 @@ import Head from "next/head";
 export default () => (
   <App>
     <Head>
-      <title>Nat? Nat. Nat! | About</title>
+      <title>Nat? Nat. Nat! | Loading...</title>
     </Head>
     <Header />
     <article>
+      Loading...
     </article>
     <Footer />
   </App>

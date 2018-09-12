@@ -62,7 +62,6 @@ export default class Auth {
     // Check whether the current time is past the
     // Access Token's expiry time
     let expiresAt = nookies.get(this.ctx, "expires_at") || 0;
-    console.log(expiresAt)
     return new Date().getTime() < expiresAt;
   }
 }
